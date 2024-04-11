@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Roboto;
+  background-color: rgb(26, 26, 26);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gameboard {
+  margin: 100px;
+}
+
+.player-choice {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.player-choice > button {
+  width: 258px;
+  padding: 10px 0;
+  background-color: white;
+  color: black;
+  border: 0px;
+  border-radius: 5px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 170px);
+  grid-template-rows: repeat(3,170px);
+  gap: 8px;
+}
+
+.tiles > div {
+  background-color: rgb(0, 0, 0);
+  border-radius: 10px;
+}
+
+.restart-button {
+  background-color: white;
+  color: black;
+  margin: 10px 0;
+  padding: 10px 20px;
+  border: 0px;
+  border-radius: 5px;
+}
