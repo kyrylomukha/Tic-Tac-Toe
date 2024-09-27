@@ -1,15 +1,15 @@
-const main = document.querySelector(".main-section");
-const vsPlayerBtn = createHtmlElement("button", "id", "vs-player", "VS Player");
-const vsComputerBtn = createHtmlElement("button", "id", "vs-computer","VS Computer",);
+const mainSection = document.querySelector(".main-section");
+const vsPlayerButton = createHtmlElement("button", "id", "vs-player", "VS Player");
+const vsComputerButton = createHtmlElement("button", "id", "vs-computer","VS Computer",);
 
-main.appendChild(vsPlayerBtn);
-main.appendChild(vsComputerBtn);
+mainSection.appendChild(vsPlayerButton);
+mainSection.appendChild(vsComputerButton);
 
-let playerChoice = "X";
-let userChoice = "";
-let gameType = "";
+let currentPlayerSymbol = "X";
+let humanPlayerSymbol = "";
+let gameMode = "";
 let gameResult;
-let isOn = "";
+let isGameActive = "";
 
 const game = {
   0: "",
@@ -23,77 +23,77 @@ const game = {
   8: "",
 };
 
-function updatePage() {
-  cleanElement(main);
-  createGameboard();
+function updateGameDisplay() {
+  cleanElement(mainSection);
+  createGameBoard();
 }
 
-let tiles = [];
+let gameTiles = [];
 
-function createGameboard() {
-  tiles = [];
-  isOn = true;
-  playerChoice = "X";
+function createGameBoard() {
+  gameTiles = [];
+  isGameActive = true;
+  currentPlayerSymbol = "X";
 
-  if (gameType === "vsComputer") {
-    moveFirst();
+  if (gameMode === "vsComputer") {
+    makeComputerMoveFirst();
   }
   const gameSection = createHtmlElement("section", "class", "gameboard", null);
-  main.appendChild(gameSection);
+  mainSection.appendChild(gameSection);
 
   gameResult = createHtmlElement("section", "class", "result", null);
   gameSection.appendChild(gameResult);
 
-  const gameBoard = createHtmlElement("section", "class", "tiles", null);
+  const gameBoard = createHtmlElement("section", "class", "gameTiles", null);
   gameSection.appendChild(gameBoard);
 
   for (let i = 0; i < 9; i++) {
     const tile = createHtmlElement("div", "data-number", i, null);
     gameBoard.appendChild(tile);
-    tiles.push(tile);
+    gameTiles.push(tile);
   }
-  console.log(tiles);
+  console.log(gameTiles);
 
-  const backBtn = createHtmlElement("button", "class", "white-button", "Back to Menu",);
-  const restartBtn = createHtmlElement("button", null, null, "Restart Game");
-  gameSection.appendChild(backBtn);
-  gameSection.appendChild(restartBtn);
+  const backToMenuButton = createHtmlElement("button", "class", "white-button", "Back to Menu",);
+  const restartGameButton = createHtmlElement("button", null, null, "Restart Game");
+  gameSection.appendChild(backToMenuButton);
+  gameSection.appendChild(restartGameButton);
 
-  backBtn.addEventListener("click", () => {
-    cleanElement(main);
+  backToMenuButton.addEventListener("click", () => {
+    cleanElement(mainSection);
     createMenu();
-    gameType = "";
+    gameMode = "";
     refreshObj(game);
   });
 
-  restartBtn.addEventListener("click", () => {
-    tiles = [];
+  restartGameButton.addEventListener("click", () => {
+    gameTiles = [];
     refreshObj(game);
-    isOn = true;
-    playerChoice = "X";
+    isGameActive = true;
+    currentPlayerSymbol = "X";
     cleanElement(gameResult);
-    updatePage();
+    updateGameDisplay();
   });
 
-  for (const tile of tiles) {
+  for (const tile of gameTiles) {
     tile.addEventListener(
       "click",
       () => {
-        if (!isOn) {
+        if (!isGameActive) {
           return;
-        } else if (gameType === "vsPlayer") {
-          drawSymbol(playerChoice, tile);
+        } else if (gameMode === "vsPlayer") {
+          drawSymbol(currentPlayerSymbol, tile);
           let dataNumber = extractDataNumber(tile);
-          updateObject(dataNumber, game, playerChoice);
+          updateObject(dataNumber, game, currentPlayerSymbol);
           changeSymbol();
           controlFlow(game);
-        } else if (gameType === "vsComputer") {
+        } else if (gameMode === "vsComputer") {
           let dataNumber = extractDataNumber(tile);
           if (game[dataNumber] == "") {
-            drawSymbol(userChoice, tile);
-            updateObject(dataNumber, game, userChoice);
+            drawSymbol(humanPlayerSymbol, tile);
+            updateObject(dataNumber, game, humanPlayerSymbol);
             controlFlow(game);
-            if (isOn) {
+            if (isGameActive) {
               drawComputerChoice(game);
               controlFlow(game);
             }
@@ -105,9 +105,9 @@ function createGameboard() {
   }
 }
 
-function moveFirst() {
+function makeComputerMoveFirst() {
   if (
-    userChoice === "O" &&
+    humanPlayerSymbol === "O" &&
     Object.values(game).every((value) => value === "")
   ) {
     drawComputerChoice(game);
@@ -121,26 +121,26 @@ function createMenu() {
 
   const choiceSection = createHtmlElement("section", "class", "choice", null);
 
-  const vsPlayerBtn = createHtmlElement("button", "id", "vs-player", "VS Player");
-  const vsComputerBtn = createHtmlElement("button", "id", "vs-computer", "VS Computer");
+  const vsPlayerButton = createHtmlElement("button", "id", "vs-player", "VS Player");
+  const vsComputerButton = createHtmlElement("button", "id", "vs-computer", "VS Computer");
 
-  choiceSection.appendChild(vsPlayerBtn);
-  choiceSection.appendChild(vsComputerBtn);
+  choiceSection.appendChild(vsPlayerButton);
+  choiceSection.appendChild(vsComputerButton);
 
-  main.appendChild(header);
-  main.appendChild(choiceSection);
+  mainSection.appendChild(header);
+  mainSection.appendChild(choiceSection);
 
-  vsPlayerBtn.addEventListener("click", () => {
-    cleanElement(main);
-    createGameboard();
-    gameType = "vsPlayer";
+  vsPlayerButton.addEventListener("click", () => {
+    cleanElement(mainSection);
+    createGameBoard();
+    gameMode = "vsPlayer";
   });
 
-  vsComputerBtn.addEventListener("click", () => {
-    cleanElement(main);
+  vsComputerButton.addEventListener("click", () => {
+    cleanElement(mainSection);
     showOptions();
     console.log("works");
-    gameType = "vsComputer";
+    gameMode = "vsComputer";
   });
 }
 
@@ -165,40 +165,40 @@ function showOptions() {
   const header = createHtmlElement("header",null, null);
   const h1 = createHtmlElement("h1",null, null, "Play Tic Tac Toe");
   header.appendChild(h1);
-  main.appendChild(header);
+  mainSection.appendChild(header);
   const choiceSection = createHtmlElement("section", "class", "choice");
   const choiceText = createHtmlElement("p", null, null, "Choose your symbol");
   const xBtn = createHtmlElement("button", null, null, "X");
   const oBtn = createHtmlElement("button", null, null, "O");
-  main.appendChild(choiceSection);
+  mainSection.appendChild(choiceSection);
   choiceSection.appendChild(choiceText);
   choiceSection.appendChild(xBtn);
   choiceSection.appendChild(oBtn);
 
   xBtn.addEventListener("click", () => {
-    playerChoice = "X";
-    userChoice = "X";
-    updatePage();
+    currentPlayerSymbol = "X";
+    humanPlayerSymbol = "X";
+    updateGameDisplay();
   });
 
   oBtn.addEventListener("click", () => {
-    playerChoice = "O";
-    userChoice = "O";
-    updatePage();
+    currentPlayerSymbol = "O";
+    humanPlayerSymbol = "O";
+    updateGameDisplay();
   });
 }
 
 // Event listeners
-vsPlayerBtn.addEventListener("click", () => {
-  cleanElement(main);
-  createGameboard();
-  gameType = "vsPlayer";
+vsPlayerButton.addEventListener("click", () => {
+  cleanElement(mainSection);
+  createGameBoard();
+  gameMode = "vsPlayer";
 });
 
-vsComputerBtn.addEventListener("click", () => {
-  cleanElement(main);
+vsComputerButton.addEventListener("click", () => {
+  cleanElement(mainSection);
   showOptions();
-  gameType = "vsComputer";
+  gameMode = "vsComputer";
 });
 
 const Xs = [];
@@ -240,7 +240,7 @@ function extractDataNumber(el) {
 }
 
 function endGame() {
-  isOn = false;
+  isGameActive = false;
 }
 
 function restartGame() {
@@ -250,10 +250,10 @@ function restartGame() {
 }
 
 function changeSymbol() {
-  if (playerChoice === "X") {
-    playerChoice = "O";
-  } else if (playerChoice === "O") {
-    playerChoice = "X";
+  if (currentPlayerSymbol === "X") {
+    currentPlayerSymbol = "O";
+  } else if (currentPlayerSymbol === "O") {
+    currentPlayerSymbol = "X";
   }
 }
 
@@ -280,7 +280,7 @@ function controlFlow(obj) {
       (obj[1] === mark && obj[4] === mark && obj[7] === mark) ||
       (obj[2] === mark && obj[5] === mark && obj[8] === mark)
     ) {
-      if (gameType === "vsPlayer") {
+      if (gameMode === "vsPlayer") {
         if (mark === "X") {
           showMessage("The Winner is Player X");
         } else if (mark === "O") {
@@ -288,10 +288,10 @@ function controlFlow(obj) {
         }
         endGame();
         return;
-      } else if (gameType === "vsComputer") {
-        if (mark === userChoice) {
+      } else if (gameMode === "vsComputer") {
+        if (mark === humanPlayerSymbol) {
           showMessage("Congrats");
-        } else if (mark !== userChoice) {
+        } else if (mark !== humanPlayerSymbol) {
           showMessage("It's not your day. Try again");
         }
         endGame();
@@ -319,9 +319,9 @@ function getRandomNum(max) {
 
 function drawComputerChoice(obj) {
   let oppositeSymbol;
-  if (userChoice === "X") {
+  if (humanPlayerSymbol === "X") {
     oppositeSymbol = "O";
-  } else if (userChoice === "O") {
+  } else if (humanPlayerSymbol === "O") {
     oppositeSymbol = "X";
   }
 
@@ -329,7 +329,7 @@ function drawComputerChoice(obj) {
   if (obj[random] === "") {
     obj[random] = oppositeSymbol;
     setTimeout(() => {
-      drawSymbol(oppositeSymbol, tiles[random]);
+      drawSymbol(oppositeSymbol, gameTiles[random]);
     }, 500);
   } else drawComputerChoice(obj);
 }
