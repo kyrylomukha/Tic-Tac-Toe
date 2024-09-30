@@ -5,23 +5,29 @@ const vsComputerButton = createHtmlElement("button", "id", "vs-computer","VS Com
 mainSection.appendChild(vsPlayerButton);
 mainSection.appendChild(vsComputerButton);
 
+const BOARD_SIZE = 9;
+const PLAYER_SYMBOLS = {
+  X: 'X',
+  O: 'O',
+};
+
+const GAME_MODES = {
+  VS_PLAYER: 'vsPlayer',
+  VS_COMPUTER: 'vsComputer',
+};
+
 let currentPlayerSymbol = "X";
 let humanPlayerSymbol = "";
 let gameMode = "";
 let gameResult;
 let isGameActive = "";
 
-const game = {
-  0: "",
-  1: "",
-  2: "",
-  3: "",
-  4: "",
-  5: "",
-  6: "",
-  7: "",
-  8: "",
+const symbols = {
+  Xs: [],
+  Os: [],
 };
+
+const game = Array(BOARD_SIZE).fill("");
 
 function updateGameDisplay() {
   cleanElement(mainSection);
@@ -35,7 +41,7 @@ function createGameBoard() {
   isGameActive = true;
   currentPlayerSymbol = "X";
 
-  if (gameMode === "vsComputer") {
+  if (gameMode === GAME_MODES.VS_COMPUTER && humanPlayerSymbol === "O") {
     makeComputerMoveFirst();
   }
   const gameSection = createHtmlElement("section", "class", "gameboard", null);
@@ -47,12 +53,11 @@ function createGameBoard() {
   const gameBoard = createHtmlElement("section", "class", "gameTiles", null);
   gameSection.appendChild(gameBoard);
 
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < BOARD_SIZE; i++) {
     const tile = createHtmlElement("div", "data-number", i, null);
     gameBoard.appendChild(tile);
     gameTiles.push(tile);
   }
-  console.log(gameTiles);
 
   const backToMenuButton = createHtmlElement("button", "class", "white-button", "Back to Menu",);
   const restartGameButton = createHtmlElement("button", null, null, "Restart Game");
@@ -63,12 +68,12 @@ function createGameBoard() {
     cleanElement(mainSection);
     createMenu();
     gameMode = "";
-    refreshObj(game);
+    game.fill("");
   });
 
   restartGameButton.addEventListener("click", () => {
     gameTiles = [];
-    refreshObj(game);
+    game.fill("");
     isGameActive = true;
     currentPlayerSymbol = "X";
     cleanElement(gameResult);
@@ -81,21 +86,21 @@ function createGameBoard() {
       () => {
         if (!isGameActive) {
           return;
-        } else if (gameMode === "vsPlayer") {
+        } else if (gameMode === GAME_MODES.VS_PLAYER) {
           drawSymbol(currentPlayerSymbol, tile);
-          let dataNumber = extractDataNumber(tile);
+          let dataNumber = +tile.getAttribute("data-number");
           updateObject(dataNumber, game, currentPlayerSymbol);
-          changeSymbol();
-          controlFlow(game);
-        } else if (gameMode === "vsComputer") {
-          let dataNumber = extractDataNumber(tile);
+          changeSymbol(currentPlayerSymbol);
+          checkGameStatus(game);
+        } else if (gameMode === GAME_MODES.VS_COMPUTER) {
+          let dataNumber = +tile.getAttribute("data-number");
           if (game[dataNumber] == "") {
             drawSymbol(humanPlayerSymbol, tile);
             updateObject(dataNumber, game, humanPlayerSymbol);
-            controlFlow(game);
+            checkGameStatus(game);
             if (isGameActive) {
               drawComputerChoice(game);
-              controlFlow(game);
+              checkGameStatus(game);
             }
           }
         }
@@ -133,14 +138,14 @@ function createMenu() {
   vsPlayerButton.addEventListener("click", () => {
     cleanElement(mainSection);
     createGameBoard();
-    gameMode = "vsPlayer";
+    gameMode = GAME_MODES.VS_PLAYER;
   });
 
   vsComputerButton.addEventListener("click", () => {
     cleanElement(mainSection);
     showOptions();
     console.log("works");
-    gameMode = "vsComputer";
+    gameMode = GAME_MODES.VS_COMPUTER;
   });
 }
 
@@ -192,26 +197,23 @@ function showOptions() {
 vsPlayerButton.addEventListener("click", () => {
   cleanElement(mainSection);
   createGameBoard();
-  gameMode = "vsPlayer";
+  gameMode = GAME_MODES.VS_PLAYER;
 });
 
 vsComputerButton.addEventListener("click", () => {
   cleanElement(mainSection);
   showOptions();
-  gameMode = "vsComputer";
+  gameMode = GAME_MODES.VS_COMPUTER;
 });
-
-const Xs = [];
-const Os = [];
 
 function generateSymbols(symbol) {
   for (let i = 1; i < 10; i++) {
     const newSymbol = createHtmlElement("img","src",`assets/images/${symbol}'s/${symbol}${i}.png`);
     newSymbol.setAttribute("alt", `${symbol} symbol`);
     if (symbol === "X") {
-      Xs.push(newSymbol);
+      symbols.Xs.push(newSymbol);
     } else if (symbol === "O") {
-      Os.push(newSymbol);
+      symbols.Os.push(newSymbol);
     }
   }
 }
@@ -220,23 +222,16 @@ generateSymbols("X");
 generateSymbols("O");
 
 function drawSymbol(symbol, parent) {
-  const random = getRandomNum(9);
+  const random = getRandomNum(BOARD_SIZE);
   let image = 0;
   if (symbol === "X") {
-    image = Xs[random];
+    image = symbols.Xs[random];
   } else if (symbol === "O") {
-    image = Os[random];
+    image = symbols.Os[random];
   }
 
   const cloneImage = image.cloneNode(true);
   parent.appendChild(cloneImage);
-}
-
-function extractDataNumber(el) {
-  let dataNumber = el.getAttribute("data-number");
-  dataNumber = +dataNumber;
-  console.log(dataNumber);
-  return dataNumber;
 }
 
 function endGame() {
@@ -249,25 +244,18 @@ function restartGame() {
   }
 }
 
-function changeSymbol() {
-  if (currentPlayerSymbol === "X") {
-    currentPlayerSymbol = "O";
-  } else if (currentPlayerSymbol === "O") {
-    currentPlayerSymbol = "X";
-  }
+function changeSymbol(playerType) {
+  let oppositeSymbol = playerType === PLAYER_SYMBOLS.X ? PLAYER_SYMBOLS.O : PLAYER_SYMBOLS.X;
+  if(gameMode === GAME_MODES.VS_COMPUTER) return oppositeSymbol;
+  else if(gameMode === GAME_MODES.VS_PLAYER) return currentPlayerSymbol = oppositeSymbol;
 }
 
 function updateObject(num, obj, userType) {
   obj[num] = userType;
 }
 
-function refreshObj(obj) {
-  for (let key in obj) {
-    obj[key] = "";
-  }
-}
-
-function controlFlow(obj) {
+// Скоротити функцію
+function checkGameStatus(obj) {
   let marks = ["X", "O"];
   for (let mark of marks) {
     if (
@@ -280,17 +268,16 @@ function controlFlow(obj) {
       (obj[1] === mark && obj[4] === mark && obj[7] === mark) ||
       (obj[2] === mark && obj[5] === mark && obj[8] === mark)
     ) {
-      if (gameMode === "vsPlayer") {
+      if (gameMode === GAME_MODES.VS_PLAYER) {
         if (mark === "X") {
-          showMessage("The Winner is Player X");
-        } else if (mark === "O") {
-          showMessage("The Winner is Player O");
-        }
-        endGame();
+          showMessage("The Winner is Player X"); 
+        } else if(mark === "X") {
+            showMessage("The Winner is Player O");
+          } endGame();
         return;
-      } else if (gameMode === "vsComputer") {
+      } else if (gameMode === GAME_MODES.VS_COMPUTER) {
         if (mark === humanPlayerSymbol) {
-          showMessage("Congrats");
+          showMessage("Congrats, you won");
         } else if (mark !== humanPlayerSymbol) {
           showMessage("It's not your day. Try again");
         }
@@ -301,7 +288,6 @@ function controlFlow(obj) {
   }
   if (Object.values(obj).every((value) => value === "X" || value === "O")) {
     showMessage("It's a Draw");
-    console.log("draw");
     endGame();
   }
 }
@@ -310,22 +296,18 @@ function showMessage(message) {
   const header = createHtmlElement("h1", null, null, message);
   setTimeout(() => {
     gameResult.appendChild(header);
-  }, 500);
+  }, 100);
 }
 
 function getRandomNum(max) {
   return Math.floor(Math.random() * max);
 }
 
+// Рекурсію замінити на while
 function drawComputerChoice(obj) {
-  let oppositeSymbol;
-  if (humanPlayerSymbol === "X") {
-    oppositeSymbol = "O";
-  } else if (humanPlayerSymbol === "O") {
-    oppositeSymbol = "X";
-  }
+  let oppositeSymbol = changeSymbol(humanPlayerSymbol);
 
-  let random = getRandomNum(9);
+  let random = getRandomNum(BOARD_SIZE);
   if (obj[random] === "") {
     obj[random] = oppositeSymbol;
     setTimeout(() => {
