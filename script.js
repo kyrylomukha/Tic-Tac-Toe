@@ -1,19 +1,19 @@
 const mainSection = document.querySelector(".main-section");
 const vsPlayerButton = createHtmlElement("button", "id", "vs-player", "VS Player");
-const vsComputerButton = createHtmlElement("button", "id", "vs-computer","VS Computer",);
+const vsComputerButton = createHtmlElement("button", "id", "vs-computer", "VS Computer");
 
 mainSection.appendChild(vsPlayerButton);
 mainSection.appendChild(vsComputerButton);
 
 const BOARD_SIZE = 9;
 const PLAYER_SYMBOLS = {
-  X: 'X',
-  O: 'O',
+  X: "X",
+  O: "O",
 };
 
 const GAME_MODES = {
-  VS_PLAYER: 'vsPlayer',
-  VS_COMPUTER: 'vsComputer',
+  VS_PLAYER: "vsPlayer",
+  VS_COMPUTER: "vsComputer",
 };
 
 let currentPlayerSymbol = "X";
@@ -61,10 +61,10 @@ function createGameBoard() {
     const tile = createHtmlElement("div", "data-number", i, null);
     gameBoard.appendChild(tile);
     gameTiles.push(tile);
-    tile.addEventListener("click", () => handleTileClick(tile), {once: true});
+    tile.addEventListener("click", () => handleTileClick(tile), { once: true });
   }
 
-  const backToMenuButton = createHtmlElement("button", "class", "white-button", "Back to Menu",);
+  const backToMenuButton = createHtmlElement("button", "class", "white-button", "Back to Menu");
   const restartGameButton = createHtmlElement("button", null, null, "Restart Game");
   gameSection.appendChild(backToMenuButton);
   gameSection.appendChild(restartGameButton);
@@ -84,29 +84,32 @@ function createGameBoard() {
     cleanElement(gameResult);
     updateGameDisplay();
   });
-  }
+}
 
 function handleTileClick(tile) {
   let dataNumber = +tile.getAttribute("data-number");
   if (!isGameActive) return;
-     else if (gameMode === GAME_MODES.VS_PLAYER) {
-              drawSymbol(currentPlayerSymbol, tile);
-              updateObject(dataNumber, game, currentPlayerSymbol);
-              changeSymbol(currentPlayerSymbol);
-              checkGameStatus(game);
-  }  else if (gameMode === GAME_MODES.VS_COMPUTER && game[dataNumber] == "") {
-              drawSymbol(humanPlayerSymbol, tile);
-              updateObject(dataNumber, game, humanPlayerSymbol);
-              checkGameStatus(game);
-            if (isGameActive) {
-              drawComputerChoice(game);
-              checkGameStatus(game);
-            }
-        }
+  else if (gameMode === GAME_MODES.VS_PLAYER) {
+    drawSymbol(currentPlayerSymbol, tile);
+    updateObject(dataNumber, game, currentPlayerSymbol);
+    changeSymbol(currentPlayerSymbol);
+    checkGameStatus(game);
+  } else if (gameMode === GAME_MODES.VS_COMPUTER && game[dataNumber] == "") {
+    drawSymbol(humanPlayerSymbol, tile);
+    updateObject(dataNumber, game, humanPlayerSymbol);
+    checkGameStatus(game);
+    if (isGameActive) {
+      drawComputerChoice(game);
+      checkGameStatus(game);
+    }
+  }
 }
 
 function makeComputerMoveFirst() {
-  if (humanPlayerSymbol === "O" && Object.values(game).every((value) => value === "")) {
+  if (
+    humanPlayerSymbol === "O" &&
+    Object.values(game).every((value) => value === "")
+  ) {
     drawComputerChoice(game);
   }
 }
@@ -149,8 +152,8 @@ function createHtmlElement(el, attribute, attributeName, text) {
 }
 
 function showOptions() {
-  const header = createHtmlElement("header",null, null);
-  const h1 = createHtmlElement("h1",null, null, "Play Tic Tac Toe");
+  const header = createHtmlElement("header", null, null);
+  const h1 = createHtmlElement("h1", null, null, "Play Tic Tac Toe");
   header.appendChild(h1);
   mainSection.appendChild(header);
   const choiceSection = createHtmlElement("section", "class", "choice");
@@ -189,7 +192,7 @@ function runVsComputerMode() {
 
 function generateSymbols(symbol) {
   for (let i = 1; i < 10; i++) {
-    const newSymbol = createHtmlElement("img","src",`assets/images/${symbol}'s/${symbol}${i}.png`);
+    const newSymbol = createHtmlElement("img", "src", `assets/images/${symbol}'s/${symbol}${i}.png`);
     newSymbol.setAttribute("alt", `${symbol} symbol`);
     if (symbol === "X") {
       symbols.Xs.push(newSymbol);
@@ -227,8 +230,9 @@ function restartGame() {
 
 function changeSymbol(playerType) {
   let oppositeSymbol = playerType === PLAYER_SYMBOLS.X ? PLAYER_SYMBOLS.O : PLAYER_SYMBOLS.X;
-  if(gameMode === GAME_MODES.VS_COMPUTER) return oppositeSymbol;
-  else if(gameMode === GAME_MODES.VS_PLAYER) return currentPlayerSymbol = oppositeSymbol;
+  if (gameMode === GAME_MODES.VS_COMPUTER) return oppositeSymbol;
+  else if (gameMode === GAME_MODES.VS_PLAYER)
+    return (currentPlayerSymbol = oppositeSymbol);
 }
 
 function updateObject(num, obj, userType) {
@@ -249,13 +253,13 @@ function checkGameStatus(obj) {
       (obj[2] === mark && obj[5] === mark && obj[8] === mark)
     ) {
       if (gameMode === GAME_MODES.VS_PLAYER) {
-        showMessage(`The Winner is Player ${mark}`); 
+        showMessage(`The Winner is Player ${mark}`);
         return;
       } else if (gameMode === GAME_MODES.VS_COMPUTER) {
-          if (mark === humanPlayerSymbol) {
-            showMessage("Congrats, you won");
+        if (mark === humanPlayerSymbol) {
+          showMessage("Congrats, you won");
         } else if (mark !== humanPlayerSymbol) {
-            showMessage("It's not your day. Try again");
+          showMessage("It's not your day. Try again");
         }
         endGame();
         return;
