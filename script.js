@@ -29,6 +29,9 @@ const symbols = {
 
 const game = Array(BOARD_SIZE).fill("");
 
+vsPlayerButton.addEventListener("click", () => runVsPlayerMode());
+vsComputerButton.addEventListener("click", () => runVsComputerMode());
+
 function updateGameDisplay() {
   cleanElement(mainSection);
   createGameBoard();
@@ -39,11 +42,12 @@ let gameTiles = [];
 function createGameBoard() {
   gameTiles = [];
   isGameActive = true;
-  currentPlayerSymbol = "X";
+  currentPlayerSymbol = PLAYER_SYMBOLS.X;
 
   if (gameMode === GAME_MODES.VS_COMPUTER && humanPlayerSymbol === "O") {
     makeComputerMoveFirst();
   }
+
   const gameSection = createHtmlElement("section", "class", "gameboard", null);
   mainSection.appendChild(gameSection);
 
@@ -57,6 +61,7 @@ function createGameBoard() {
     const tile = createHtmlElement("div", "data-number", i, null);
     gameBoard.appendChild(tile);
     gameTiles.push(tile);
+    tile.addEventListener("click", () => handleTileClick(tile), {once: true});
   }
 
   const backToMenuButton = createHtmlElement("button", "class", "white-button", "Back to Menu",);
@@ -79,42 +84,29 @@ function createGameBoard() {
     cleanElement(gameResult);
     updateGameDisplay();
   });
+  }
 
-  for (const tile of gameTiles) {
-    tile.addEventListener(
-      "click",
-      () => {
-        if (!isGameActive) {
-          return;
-        } else if (gameMode === GAME_MODES.VS_PLAYER) {
-          drawSymbol(currentPlayerSymbol, tile);
-          let dataNumber = +tile.getAttribute("data-number");
-          updateObject(dataNumber, game, currentPlayerSymbol);
-          changeSymbol(currentPlayerSymbol);
-          checkGameStatus(game);
-        } else if (gameMode === GAME_MODES.VS_COMPUTER) {
-          let dataNumber = +tile.getAttribute("data-number");
-          if (game[dataNumber] == "") {
-            drawSymbol(humanPlayerSymbol, tile);
-            updateObject(dataNumber, game, humanPlayerSymbol);
-            checkGameStatus(game);
+function handleTileClick(tile) {
+  let dataNumber = +tile.getAttribute("data-number");
+  if (!isGameActive) return;
+     else if (gameMode === GAME_MODES.VS_PLAYER) {
+              drawSymbol(currentPlayerSymbol, tile);
+              updateObject(dataNumber, game, currentPlayerSymbol);
+              changeSymbol(currentPlayerSymbol);
+              checkGameStatus(game);
+  }  else if (gameMode === GAME_MODES.VS_COMPUTER && game[dataNumber] == "") {
+              drawSymbol(humanPlayerSymbol, tile);
+              updateObject(dataNumber, game, humanPlayerSymbol);
+              checkGameStatus(game);
             if (isGameActive) {
               drawComputerChoice(game);
               checkGameStatus(game);
             }
-          }
         }
-      },
-      { once: true },
-    );
-  }
 }
 
 function makeComputerMoveFirst() {
-  if (
-    humanPlayerSymbol === "O" &&
-    Object.values(game).every((value) => value === "")
-  ) {
+  if (humanPlayerSymbol === "O" && Object.values(game).every((value) => value === "")) {
     drawComputerChoice(game);
   }
 }
@@ -135,18 +127,8 @@ function createMenu() {
   mainSection.appendChild(header);
   mainSection.appendChild(choiceSection);
 
-  vsPlayerButton.addEventListener("click", () => {
-    cleanElement(mainSection);
-    createGameBoard();
-    gameMode = GAME_MODES.VS_PLAYER;
-  });
-
-  vsComputerButton.addEventListener("click", () => {
-    cleanElement(mainSection);
-    showOptions();
-    console.log("works");
-    gameMode = GAME_MODES.VS_COMPUTER;
-  });
+  vsPlayerButton.addEventListener("click", () => runVsPlayerMode());
+  vsComputerButton.addEventListener("click", () => runVsComputerMode());
 }
 
 function cleanElement(el) {
@@ -193,18 +175,17 @@ function showOptions() {
   });
 }
 
-// Event listeners
-vsPlayerButton.addEventListener("click", () => {
+function runVsPlayerMode() {
   cleanElement(mainSection);
   createGameBoard();
   gameMode = GAME_MODES.VS_PLAYER;
-});
+}
 
-vsComputerButton.addEventListener("click", () => {
+function runVsComputerMode() {
   cleanElement(mainSection);
   showOptions();
   gameMode = GAME_MODES.VS_COMPUTER;
-});
+}
 
 function generateSymbols(symbol) {
   for (let i = 1; i < 10; i++) {
@@ -254,7 +235,6 @@ function updateObject(num, obj, userType) {
   obj[num] = userType;
 }
 
-// Скоротити функцію
 function checkGameStatus(obj) {
   let marks = ["X", "O"];
   for (let mark of marks) {
@@ -269,24 +249,21 @@ function checkGameStatus(obj) {
       (obj[2] === mark && obj[5] === mark && obj[8] === mark)
     ) {
       if (gameMode === GAME_MODES.VS_PLAYER) {
-        if (mark === "X") {
-          showMessage("The Winner is Player X"); 
-        } else if(mark === "X") {
-            showMessage("The Winner is Player O");
-          } endGame();
+        showMessage(`The Winner is Player ${mark}`); 
         return;
       } else if (gameMode === GAME_MODES.VS_COMPUTER) {
-        if (mark === humanPlayerSymbol) {
-          showMessage("Congrats, you won");
+          if (mark === humanPlayerSymbol) {
+            showMessage("Congrats, you won");
         } else if (mark !== humanPlayerSymbol) {
-          showMessage("It's not your day. Try again");
+            showMessage("It's not your day. Try again");
         }
         endGame();
         return;
       }
     }
   }
-  if (Object.values(obj).every((value) => value === "X" || value === "O")) {
+
+  if (Object.values(obj).every((value) => value !== "")) {
     showMessage("It's a Draw");
     endGame();
   }
@@ -303,10 +280,8 @@ function getRandomNum(max) {
   return Math.floor(Math.random() * max);
 }
 
-// Рекурсію замінити на while
 function drawComputerChoice(obj) {
   let oppositeSymbol = changeSymbol(humanPlayerSymbol);
-
   let random = getRandomNum(BOARD_SIZE);
   if (obj[random] === "") {
     obj[random] = oppositeSymbol;
